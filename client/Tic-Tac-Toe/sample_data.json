@@ -1,0 +1,19 @@
+{
+  "id": "board1",
+  "turn": {
+    "username": "player1",
+    "piece": "X"
+  },
+  "board": ["X","-","-","-","-","-","-","-","-"]
+}
+
+{
+  "id": "board1",
+  "turn": 
+    {
+    "username": "player1",
+    "piece": "X"
+  }
+  ,
+  "board": ["X","O","-","-","-","-","-","-","-"]
+}
