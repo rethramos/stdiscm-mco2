@@ -38,14 +38,13 @@ public class Main {
         });
 
 
-//        server.addEventListener("chatevent", ChatObject.class, new DataListener<ChatObject>() {
-//            @Override
-//            public void onData(SocketIOClient client, ChatObject data, AckRequest ackRequest) {
-//                // broadcast messages to all clients
-//                System.out.println("Send a message to all clients: " + data.getMessage() + ", from: " + data.getUserName());
-//                server.getBroadcastOperations().sendEvent("chatevent", data);
-//            }
-//        });
+        server.addEventListener("turnchange", BoardState.class, new DataListener<BoardState>() {
+
+            @Override
+            public void onData(SocketIOClient socketIOClient, BoardState boardState, AckRequest ackRequest) throws Exception {
+                System.out.println("boardState: " + boardState.toString());
+            }
+        });
 
         server.start();
 

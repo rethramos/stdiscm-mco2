@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 public class BoardState {
     private String id;
     private Player turn;
@@ -37,5 +39,14 @@ public class BoardState {
 
     public void setBoard(char[] board) {
         this.board = board;
+    }
+
+    @Override
+    public String toString() {
+        return "BoardState{" +
+                "id='" + id + '\'' +
+                ", turn=" + turn.getUsername() +
+                ", board=" + Arrays.toString(board) +
+                '}';
     }
 }
