@@ -23,6 +23,11 @@ const socket = io("ws://localhost:9092");
 console.log({ socket });
 socket.on("connect", function () {
   console.log("Client connected.");
+  socket.emit("playerqueue", {
+    username: "player" + Math.random() * 1000,
+    piece: null,
+    sessionId: socket.id,
+  });
 });
 
 socket.on("disconnect", function () {
