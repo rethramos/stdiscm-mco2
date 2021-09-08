@@ -1,3 +1,5 @@
+const PIECES = { X: "X", O: "O", EMPTY: "-" };
+
 const X_CLASS = "x";
 const CIRCLE_CLASS = "circle";
 const WINNING_COMBINATIONS = [
@@ -20,15 +22,20 @@ const winningMessageTextElement = document.querySelector(
 const playerName = document.getElementById("playerName");
 let circleTurn;
 
-const socket = io("ws://localhost:9092");
+const player = {
+  username: "player" + Math.random() * 1000,
+  piece: null,
+  sessionId: null,
+};
+
+let boardState = { board: [], id: "", turn: "" };
+
+const socket = io();
 console.log({ socket });
 socket.on("connect", function () {
   console.log("Client connected.");
-  socket.emit("playerqueue", {
-    username: "player" + Math.random() * 1000,
-    piece: null,
-    sessionId: socket.id,
-  });
+  player.sessionId = socket.id;
+  socket.emit("playerqueue", player);
 });
 
 socket.on("disconnect", function () {
@@ -36,7 +43,24 @@ socket.on("disconnect", function () {
 });
 
 socket.on("turnchange", function (data) {
+  // check if you are current turn
+  // if current, make move
+  // else disabled yung board
   console.log({ data });
+  arrayToBoard(data.board);
+  // boardState = data;
+});
+
+socket.on("gamestart", function (data) {
+  // data: {board: [], id: '', turn: ''}
+  boardState = data;
+  console.log({ data: data });
+  arrayToBoard(boardState.board);
+
+  // player.piece =
+  // check if you are current turn
+  // if current, make move
+  // else disabled yung board
 });
 
 startGame();
@@ -57,23 +81,29 @@ function startGame() {
 
 function handleClick(e) {
   const cell = e.target;
-  const currentClass = circleTurn ? CIRCLE_CLASS : X_CLASS;
+  // const currentClass = circleTurn ? CIRCLE_CLASS : X_CLASS;
+  const currentClass = player.piece == PIECES.X ? X_CLASS : CIRCLE_CLASS;
+  console.log(player.piece, currentClass);
   placeMark(cell, currentClass);
-  socket.emit("turnchange", {
-    id: "board1",
-    turn: {
-      username: "player1",
-      piece: "X",
-    },
+
+  const newBoardState = {
+    id: boardState.id,
+    turn: player.piece,
     board: boardToArray(),
-  });
+  };
+
+  console.log({ newBoardState });
+  // emit to server
+  socket.emit("turnchange", newBoardState);
+
+  // TODO: transfer to server
   if (checkWin(currentClass)) {
     endGame(false);
   } else if (isDraw()) {
     endGame(true);
   } else {
-    swapTurns();
-    setBoardHoverClass();
+    // swapTurns();
+    // setBoardHoverClass();
   }
 }
 
@@ -137,4 +167,23 @@ function boardToArray() {
   console.log(board.children, arr);
 
   return arr;
+}
+
+function arrayToBoard(arr) {
+  const pieces = board.children;
+  console.log(arr);
+  for (let i = 0; i < arr.length; i++) {
+    const element = arr[i];
+    const piece = pieces[i];
+    console.log(piece, element);
+
+    if (element == PIECES.X) {
+      piece.classList.add(X_CLASS);
+    } else if (element == PIECES.O) {
+      piece.classList.add(CIRCLE_CLASS);
+    } else {
+      piece.classList.remove(X_CLASS);
+      piece.classList.remove(CIRCLE_CLASS);
+    }
+  }
 }
