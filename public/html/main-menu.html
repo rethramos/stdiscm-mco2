@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link rel="stylesheet" href="/css/menu.css" />
     <title>Tic Tac Toe | Menu</title>
   </head>
@@ -13,10 +14,11 @@
         <h1 class="game-title">Tic Tac Toe X Battle Royale</h1>
       </div>
       <div class="body">
-        <form method="GET" id="single-player-form">
+        <form method="POST" action="/" id="single-player-form">
           <input
             type="text"
-            id="P1"
+            id="username"
+            name="username"
             placeholder="Enter Your Name"
             required
           /><br />

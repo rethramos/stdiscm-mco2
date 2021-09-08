@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script
+      src="https://cdn.socket.io/4.1.2/socket.io.min.js"
+      integrity="sha384-toS6mmwu70G0fw54EGlWWeA4z3dyJ+dlXBtSURSKN4vyRFOcxd3Bzjj/AoOwY+Rg"
+      crossorigin="anonymous"
+    ></script>
+    <link rel="stylesheet" href="/css/queue.css" />
+    <title>Tic Tac Toe | Waiting Room</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="menu-header">
+        <h1 class="game-title">Tic Tac Toe X Battle Royale</h1>
+      </div>
+      <div class="body">
+        <form action="index.html" method="GET" id="single-player-form">
+          <h1 class="queueStatus">Looking for players...</h1>
+          <!-- Change to "Match Found" when player has entered lobby -->
+          <a type="button" class="cancelBtn" href="/">Cancel</a>
+        </form>
+      </div>
+      <div class="menu-footer">
+        <h5></h5>
+      </div>
+    </div>
+
+    <script src="/js/queue.js"></script>
+  </body>
+</html>
