@@ -90,6 +90,9 @@ io.on("connection", (socket) => {
           boards[i].turn = p2.piece;
         }
 
+        p1.socket.emit("pieceset", { piece: p1.piece });
+        p2.socket.emit("pieceset", { piece: p2.piece });
+
         // join match
         p1.socket.join(boardId);
         p2.socket.join(boardId);

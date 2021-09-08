@@ -51,6 +51,12 @@ socket.on("turnchange", function (data) {
   // boardState = data;
 });
 
+socket.on("pieceset", function (data) {
+  console.log("pieceset: ", data);
+  player.piece = data.piece;
+  board.classList.add(player.piece == PIECES.X ? X_CLASS : CIRCLE_CLASS);
+});
+
 socket.on("gamestart", function (data) {
   // data: {board: [], id: '', turn: ''}
   boardState = data;
@@ -133,13 +139,13 @@ function swapTurns() {
 }
 
 function setBoardHoverClass() {
-  board.classList.remove(X_CLASS);
-  board.classList.remove(CIRCLE_CLASS);
-  if (circleTurn) {
-    board.classList.add(CIRCLE_CLASS);
-  } else {
-    board.classList.add(X_CLASS);
-  }
+  // board.classList.remove(X_CLASS);
+  // board.classList.remove(CIRCLE_CLASS);
+  // if (circleTurn) {
+  //   board.classList.add(CIRCLE_CLASS);
+  // } else {
+  //   board.classList.add(X_CLASS);
+  // }
 }
 
 function checkWin(currentClass) {
