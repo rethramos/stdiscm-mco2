@@ -8,6 +8,17 @@ const io = new Server(server);
 
 const HTML_DIR = __dirname + "/public/html";
 
+const WINNING_COMBINATIONS = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6],
+];
+
 app.use(express.static("public"));
 
 const PIECES = { X: "X", O: "O", EMPTY: "-" };
@@ -117,7 +128,10 @@ io.on("connection", (socket) => {
     // console.log("rooms", socket.rooms);
 
     // emit "turnchange" back to clients
-
+    console.log("win?", checkWin(data));
+    console.log("draw?", isDraw(data));
+    data.hasWinner = checkWin(data);
+    data.isDraw = isDraw(data);
     io.to(data.id).emit("turnchange", data);
   });
 });
@@ -125,3 +139,30 @@ io.on("connection", (socket) => {
 server.listen(PORT, () => {
   console.log("listening on *:" + PORT);
 });
+
+function checkWin(bs) {
+  let board = bs.board;
+
+  return WINNING_COMBINATIONS.some((combination) => {
+    return (
+      board[combination[0]] == board[combination[1]] &&
+      board[combination[1]] == board[combination[2]] &&
+      board[combination[0]] != PIECES.EMPTY
+    );
+  });
+}
+
+function isDraw(bs) {
+  let board = bs.board;
+  return board.every((cell) => {
+    return cell != PIECES.EMPTY;
+  });
+}
+
+// function isDraw() {
+//   return [...cellElements].every((cell) => {
+//     return (
+//       cell.classList.contains(X_CLASS) || cell.classList.contains(CIRCLE_CLASS)
+//     );
+//   });
+// }
