@@ -17,6 +17,7 @@ const restartButton = document.getElementById("restartButton");
 const winningMessageTextElement = document.querySelector(
   "[data-winning-message-text]"
 );
+const playerName = document.getElementById("playerName");
 let circleTurn;
 
 const socket = io("ws://localhost:9092");

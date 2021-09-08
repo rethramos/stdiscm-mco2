@@ -12,8 +12,6 @@
   }
   
   .board {
-    width: 100vw;
-    height: 100vh;
     display: grid;
     justify-content: center;
     align-content: center;
@@ -144,3 +142,57 @@
   .winning-message.show {
     display: flex;
   }
+  
+	.header {
+    text-align: left; 
+    background-color: #008000;
+    padding: 3px;
+    border-bottom: 5px solid #aaa;
+    text-transform: uppercase;
+    color: #fff;
+	}
+	.container {
+		width: 60%;
+		margin: 0px auto;
+		border: 1px solid #aaa;
+		border-radius: 5px;
+		box-shadow: 4px 4px 8px 8px rgba(0, 0, 0, 0.089);
+	}
+	.footer {
+		background-color: #008000;
+		padding: 3px;
+		color: #fff;
+		text-align: center;
+	}
+	.body {
+		background-color: #fff;
+		height: 80vh;
+		border-bottom: 5px solid #aaa;
+		display: flex;
+		flex-flow: column wrap;
+		justify-content: center;
+		text-align: center;
+		align-items: center;
+		font-weight: bold;
+	}
+	
+	/* Media Queries */
+
+	@media screen and (max-width: 768px) {
+		.container {
+			width: 100%;
+		}
+
+		
+		.game-title {
+			text-align: center;
+		}
+	}
+
+	@media screen and (max-width: 1024px) {
+
+		.container {
+			width: 100%;
+		}
+
+	}
