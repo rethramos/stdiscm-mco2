@@ -48,7 +48,13 @@ socket.on("turnchange", function (data) {
   // else disabled yung board
   console.log({ data });
   arrayToBoard(data.board);
-  // boardState = data;
+  boardState = data;
+  if (player.piece != boardState.turn) {
+    //board.classList.remove(X_CLASS)
+    //board.classList.remove(CIRCLE_CLASS)
+  } else {
+    //board.classList.add(player.piece == PIECES.X ? X_CLASS : CIRCLE_CLASS);
+  }
 });
 
 socket.on("pieceset", function (data) {
@@ -79,14 +85,23 @@ function startGame() {
     cell.classList.remove(X_CLASS);
     cell.classList.remove(CIRCLE_CLASS);
     cell.removeEventListener("click", handleClick);
-    cell.addEventListener("click", handleClick, { once: true });
+    cell.addEventListener("click", handleClick);
   });
-  setBoardHoverClass();
+  //setBoardHoverClass();
   winningMessageElement.classList.remove("show");
 }
 
 function handleClick(e) {
+  console.log(boardState.turn);
   const cell = e.target;
+  if (
+    player.piece != boardState.turn ||
+    cell.classList.contains(X_CLASS) ||
+    cell.classList.contains(CIRCLE_CLASS)
+  ) {
+    return;
+  }
+
   // const currentClass = circleTurn ? CIRCLE_CLASS : X_CLASS;
   const currentClass = player.piece == PIECES.X ? X_CLASS : CIRCLE_CLASS;
   console.log(player.piece, currentClass);
@@ -94,7 +109,7 @@ function handleClick(e) {
 
   const newBoardState = {
     id: boardState.id,
-    turn: player.piece,
+    turn: oppositeOf(player.piece),
     board: boardToArray(),
   };
 
@@ -138,15 +153,15 @@ function swapTurns() {
   circleTurn = !circleTurn;
 }
 
-function setBoardHoverClass() {
-  // board.classList.remove(X_CLASS);
-  // board.classList.remove(CIRCLE_CLASS);
-  // if (circleTurn) {
-  //   board.classList.add(CIRCLE_CLASS);
-  // } else {
-  //   board.classList.add(X_CLASS);
-  // }
-}
+// function setBoardHoverClass() {
+//   // board.classList.remove(X_CLASS);
+//   // board.classList.remove(CIRCLE_CLASS);
+//   // if (circleTurn) {
+//   //   board.classList.add(CIRCLE_CLASS);
+//   // } else {
+//   //   board.classList.add(X_CLASS);
+//   // }
+// }
 
 function checkWin(currentClass) {
   return WINNING_COMBINATIONS.some((combination) => {
@@ -170,7 +185,7 @@ function boardToArray() {
     }
     arr.push(c);
   }
-  console.log(board.children, arr);
+  // console.log(board.children, arr);
 
   return arr;
 }
@@ -192,4 +207,15 @@ function arrayToBoard(arr) {
       piece.classList.remove(CIRCLE_CLASS);
     }
   }
+}
+
+function oppositeOf(piece) {
+  let p;
+
+  if (piece == PIECES.X) {
+    p = PIECES.O;
+  } else if (piece == PIECES.O) {
+    p = PIECES.X;
+  }
+  return p;
 }
