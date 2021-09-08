@@ -49,11 +49,21 @@ socket.on("turnchange", function (data) {
   console.log({ data });
   arrayToBoard(data.board);
   boardState = data;
-  if (player.piece != boardState.turn) {
-    //board.classList.remove(X_CLASS)
-    //board.classList.remove(CIRCLE_CLASS)
-  } else {
-    //board.classList.add(player.piece == PIECES.X ? X_CLASS : CIRCLE_CLASS);
+  if (boardState.hasWinner) {
+    if (player.piece != boardState.turn) {
+      winningMessageTextElement.innerText = `${
+        player.piece == PIECES.O ? "O's" : "X's"
+      } Wins!`;
+      winningMessageElement.classList.add("show");
+    } else {
+      winningMessageTextElement.innerText = `${
+        player.piece == PIECES.X ? "O's" : "X's"
+      } Wins!`;
+      winningMessageElement.classList.add("show");
+    }
+  } else if (boardState.isDraw) {
+    winningMessageTextElement.innerText = "Draw!";
+    winningMessageElement.classList.add("show");
   }
 });
 
@@ -118,14 +128,14 @@ function handleClick(e) {
   socket.emit("turnchange", newBoardState);
 
   // TODO: transfer to server
-  if (checkWin(currentClass)) {
-    endGame(false);
-  } else if (isDraw()) {
-    endGame(true);
-  } else {
-    // swapTurns();
-    // setBoardHoverClass();
-  }
+  // if (checkWin(currentClass)) {
+  //   endGame(false);
+  // } else if (isDraw()) {
+  //   endGame(true);
+  // } else {
+  //   // swapTurns();
+  //   // setBoardHoverClass();
+  // }
 }
 
 function endGame(draw) {
