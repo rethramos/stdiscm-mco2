@@ -22,7 +22,7 @@ const WINNING_COMBINATIONS = [
 app.use(express.static("public"));
 
 const PIECES = { X: "X", O: "O", EMPTY: "-" };
-const MAX_SQUAD_SIZE = 1;
+const MAX_SQUAD_SIZE = 2;
 let players = [];
 let boards = [];
 
