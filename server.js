@@ -20,9 +20,11 @@ const WINNING_COMBINATIONS = [
 ];
 
 app.use(express.static("public"));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 const PIECES = { X: "X", O: "O", EMPTY: "-" };
-const MAX_SQUAD_SIZE = 2;
+const MAX_SQUAD_SIZE = 1;
 let players = [];
 let boards = [];
 
@@ -48,6 +50,25 @@ app.get("/", (req, res) => {
   res.sendFile(HTML_DIR + "/main-menu.html");
 });
 
+app.post("/", (req, res) => {
+  // check username if already taken
+  // if username is taken
+  if (players.find((p) => p.username == req.body.username)) {
+    return res.status(400).send({ msg: "Username already taken" });
+  }
+  if (players.length == MAX_SQUAD_SIZE * 2) {
+    return res.status(400).send({ msg: "Queue is already full." });
+  }
+
+  players.push({ username: req.body.username });
+  console.log("app.post: ", players);
+  return res.status(200).send({ msg: "OK" });
+});
+
+app.get("/queue", (req, res) => {
+  res.sendFile(HTML_DIR + "/queue.html");
+});
+
 app.get("/game", (req, res) => {
   res.sendFile(HTML_DIR + "/index.html");
 });
@@ -56,28 +77,45 @@ io.on("connection", (socket) => {
   console.log("a user connected");
 
   socket.on("disconnect", () => {
-    console.log("a user disconnected session id: " + socket.id);
-    players = players.filter((player) => player.sessionId != socket.id);
-    console.log("current players:");
-    players.forEach((player) => console.log(player));
+    console.log("URL", socket.request.headers.referer);
+    let referer = socket.request.headers.referer.split("/");
+    let endpoint = referer[referer.length - 1];
+    endpoint = "/" + endpoint;
+    if (endpoint == "/game") {
+      console.log("a user disconnected session id: " + socket.id);
+      players = players.filter((player) => player.sessionId != socket.id);
+      console.log("current players:");
+      players.forEach((player) => console.log(player));
+    }
   });
 
   socket.on("playerqueue", (data) => {
     const p = data;
-    p.socket = socket;
+    // p.socket = socket;
 
     // block excess players
-    if (players.length == MAX_SQUAD_SIZE * 2) {
+    // if (players.length == MAX_SQUAD_SIZE * 2) {
+    //   return;
+    // }
+
+    // find index of logged in player
+    let loggedInPlayerIndex = players.findIndex(
+      (player) => player.username == p.username
+    );
+    players[loggedInPlayerIndex].socket = socket;
+    players[loggedInPlayerIndex].sessionId = data.sessionId;
+    console.log("logged in player: ", players[loggedInPlayerIndex]);
+    // if player is not logged in, reject
+    if (loggedInPlayerIndex == -1) {
       return;
     }
-
-    players.push(p);
-
-    if (players.indexOf(p) < MAX_SQUAD_SIZE) {
-      p.squad = 0;
+    //console.log("PLAYERS: ", players);
+    if (loggedInPlayerIndex < MAX_SQUAD_SIZE) {
+      players[loggedInPlayerIndex].squad = 0;
     } else {
-      p.squad = 1;
+      players[loggedInPlayerIndex].squad = 1;
     }
+    console.log("PLAYERS: ", players);
 
     // if there are enough players
     if (players.length == MAX_SQUAD_SIZE * 2) {
@@ -101,16 +139,16 @@ io.on("connection", (socket) => {
           boards[i].turn = p2.piece;
         }
 
-        p1.socket.emit("pieceset", { piece: p1.piece });
-        p2.socket.emit("pieceset", { piece: p2.piece });
-
-        // join match
-        p1.socket.join(boardId);
-        p2.socket.join(boardId);
-        io.to(boardId).emit(
-          "gamestart",
-          boards.find((board) => board.id == boardId)
-        );
+        p1.socket.emit("pieceset", {
+          piece: p1.piece,
+          squad: p1.squad,
+          boardId: p1.boardId,
+        });
+        p2.socket.emit("pieceset", {
+          piece: p2.piece,
+          squad: p2.squad,
+          boardId: p2.boardId,
+        });
       }
 
       // console.log("sockets: " + io.sockets.allSockets());
@@ -120,6 +158,41 @@ io.on("connection", (socket) => {
     // players.forEach((player) => console.log(player));
   });
 
+  // TODO: emit new event (matchenter)
+  socket.on("matchenter", (player) => {
+    // update socket
+    let index = players.findIndex((p) => p.username == player.username);
+    console.log("INDEX: ", index);
+    if (index == -1) return;
+
+    players[index].socket = socket;
+    players[index].sessionId = socket.id;
+    boardId = player.boardId;
+    console.log("SOCKET OF PLAYER:", players[index].socket.id);
+    console.log("BOARDID: ", boardId);
+    players[index].socket.join(boardId);
+
+    // if there are 2 players in the room
+    if (io.sockets.adapter.rooms.get(boardId).size == 2) {
+      console.log("IN MATCHENTER:", io.sockets.adapter.rooms.get(boardId));
+      io.to(boardId).emit(
+        "gamestart",
+        boards.find((board) => board.id == boardId)
+      );
+    }
+
+    // for (let i = 0; i < MAX_SQUAD_SIZE; i++) {
+    //   let p1 = players[i];
+    //   let p2 = players[i + MAX_SQUAD_SIZE];
+    //   // join match
+    //   p1.socket.join(boardId);
+    //   p2.socket.join(boardId);
+    //   io.to(boardId).emit(
+    //     "gamestart",
+    //     boards.find((board) => board.id == boardId)
+    //     );
+    //   }
+  });
   // listen to "turnchange" from client
   socket.on("turnchange", (data) => {
     console.log(data);
@@ -132,7 +205,13 @@ io.on("connection", (socket) => {
     console.log("draw?", isDraw(data));
     data.hasWinner = checkWin(data);
     data.isDraw = isDraw(data);
-    io.to(data.id).emit("turnchange", data);
+    console.log("BOARD ID:", data.id);
+    console.log("CLIENTS:", io.sockets.adapter.rooms.get(data.id));
+    console.log("SOCKET ID:", socket.id);
+    // console.log("ID:", typeof (data.id + ""));
+    console.log("ROOMS:", io.sockets.adapter.rooms);
+    io.to(data.id + "").emit("turnchange", data);
+    // io.emit("turnchange", data);
   });
 });
 

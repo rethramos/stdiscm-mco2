@@ -23,10 +23,13 @@ const playerName = document.getElementById("playerName");
 let circleTurn;
 
 const player = {
-  username: "player" + Math.random() * 1000,
-  piece: null,
+  username: sessionStorage.getItem("username"),
+  piece: sessionStorage.getItem("piece"),
+  boardId: sessionStorage.getItem("boardId"),
   sessionId: null,
 };
+
+board.classList.add(player.piece == PIECES.X ? X_CLASS : CIRCLE_CLASS);
 
 let boardState = { board: [], id: "", turn: "" };
 
@@ -35,7 +38,7 @@ console.log({ socket });
 socket.on("connect", function () {
   console.log("Client connected.");
   player.sessionId = socket.id;
-  socket.emit("playerqueue", player);
+  socket.emit("matchenter", player);
 });
 
 socket.on("disconnect", function () {
@@ -46,6 +49,7 @@ socket.on("turnchange", function (data) {
   // check if you are current turn
   // if current, make move
   // else disabled yung board
+  console.log("TURN CHANGE CLIENT");
   console.log({ data });
   arrayToBoard(data.board);
   boardState = data;
@@ -67,11 +71,11 @@ socket.on("turnchange", function (data) {
   }
 });
 
-socket.on("pieceset", function (data) {
-  console.log("pieceset: ", data);
-  player.piece = data.piece;
-  board.classList.add(player.piece == PIECES.X ? X_CLASS : CIRCLE_CLASS);
-});
+// socket.on("pieceset", function (data) {
+//   console.log("pieceset: ", data);
+//   player.piece = data.piece;
+//   board.classList.add(player.piece == PIECES.X ? X_CLASS : CIRCLE_CLASS);
+// });
 
 socket.on("gamestart", function (data) {
   // data: {board: [], id: '', turn: ''}
