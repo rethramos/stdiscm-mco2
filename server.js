@@ -24,7 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 const PIECES = { X: "X", O: "O", EMPTY: "-" };
-const MAX_SQUAD_SIZE = 1;
+const MAX_SQUAD_SIZE = 2;
 let players = [];
 let boards = [];
 
@@ -205,13 +205,20 @@ io.on("connection", (socket) => {
     console.log("draw?", isDraw(data));
     data.hasWinner = checkWin(data);
     data.isDraw = isDraw(data);
+
     console.log("BOARD ID:", data.id);
-    console.log("CLIENTS:", io.sockets.adapter.rooms.get(data.id));
-    console.log("SOCKET ID:", socket.id);
+    // console.log("CLIENTS:", io.sockets.adapter.rooms.get(data.id));
+    // console.log("SOCKET ID:", socket.id);
     // console.log("ID:", typeof (data.id + ""));
     console.log("ROOMS:", io.sockets.adapter.rooms);
     io.to(data.id + "").emit("turnchange", data);
     // io.emit("turnchange", data);
+  });
+
+  socket.on("grantpowerup", (data) => {
+    // for each match that is still ongoing, emit to squadmate
+    console.log("grantpowerup event winning squad: ", data.squad);
+    io.emit("grantpowerup", { squad: data.squad });
   });
 });
 

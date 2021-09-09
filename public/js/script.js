@@ -40,6 +40,7 @@ powerupsSpan.innerText = 0;
 board.classList.add(player.piece == PIECES.X ? X_CLASS : CIRCLE_CLASS);
 
 let boardState = { board: [], id: "", turn: "" };
+let powerupCtr = 0;
 
 const socket = io();
 console.log({ socket });
@@ -62,15 +63,30 @@ socket.on("turnchange", function (data) {
   arrayToBoard(data.board);
   boardState = data;
   if (boardState.hasWinner) {
+    // turn = o
+    // me = x
+    // you = o
     if (player.piece != boardState.turn) {
-      winningMessageTextElement.innerText = `${
-        player.piece == PIECES.O ? "O's" : "X's"
-      } Wins!`;
+      socket.emit("grantpowerup", { squad: sessionStorage.getItem("squad") });
+      if (player.piece == PIECES.O) {
+        winningMessageElement.innerText = "O's Wins!";
+      } else {
+        winningMessageElement.innerText = "X's Wins!";
+      }
+      // winningMessageTextElement.innerText = `${
+      //   player.piece == PIECES.O ? "O's" : "X's"
+      // } Wins!`;
       winningMessageElement.classList.add("show");
     } else {
-      winningMessageTextElement.innerText = `${
-        player.piece == PIECES.X ? "O's" : "X's"
-      } Wins!`;
+      if (player.piece == PIECES.O) {
+        winningMessageElement.innerText = "X's Wins!";
+      } else {
+        winningMessageElement.innerText = "O's Wins!";
+      }
+
+      // winningMessageTextElement.innerText = `${
+      //   player.piece == PIECES.X ? "O's" : "X's"
+      // } Wins!`;
       winningMessageElement.classList.add("show");
     }
   } else if (boardState.isDraw) {
@@ -79,11 +95,12 @@ socket.on("turnchange", function (data) {
   }
 });
 
-// socket.on("pieceset", function (data) {
-//   console.log("pieceset: ", data);
-//   player.piece = data.piece;
-//   board.classList.add(player.piece == PIECES.X ? X_CLASS : CIRCLE_CLASS);
-// });
+socket.on("grantpowerup", function (data) {
+  if (data.squad == sessionStorage.getItem("squad")) {
+    powerupCtr += 1;
+    powerupsSpan.innerText = powerupCtr;
+  }
+});
 
 socket.on("gamestart", function (data) {
   // data: {board: [], id: '', turn: ''}
