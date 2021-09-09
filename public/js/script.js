@@ -29,6 +29,14 @@ const player = {
   sessionId: null,
 };
 
+const usernameSpan = document.getElementById("username");
+const squadSpan = document.getElementById("squad");
+const powerupsSpan = document.getElementById("powerups");
+
+usernameSpan.innerText = player.username;
+squadSpan.innerText = sessionStorage.getItem("squad");
+powerupsSpan.innerText = 0;
+
 board.classList.add(player.piece == PIECES.X ? X_CLASS : CIRCLE_CLASS);
 
 let boardState = { board: [], id: "", turn: "" };
