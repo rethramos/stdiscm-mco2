@@ -219,7 +219,7 @@ io.on("connection", (socket) => {
       draws++;
       finishedboards++;
     }
-
+    console.log("FINISHED:", finishedboards);
     if (finishedboards == boards.length) {
       io.emit("gameend", {});
     } else {

@@ -15,7 +15,7 @@ const WINNING_COMBINATIONS = [
 const cellElements = document.querySelectorAll("[data-cell]");
 const board = document.getElementById("board");
 const winningMessageElement = document.getElementById("winningMessage");
-const restartButton = document.getElementById("restartButton");
+// const restartButton = document.getElementById("restartButton");
 const winningMessageTextElement = document.querySelector(
   "[data-winning-message-text]"
 );
@@ -71,9 +71,9 @@ socket.on("turnchange", function (data) {
     if (player.piece != boardState.turn) {
       socket.emit("grantpowerup", { squad: sessionStorage.getItem("squad") });
       if (player.piece == PIECES.O) {
-        winningMessageElement.innerText = "O's Wins!";
+        winningMessageTextElement.innerText = "O's Wins!";
       } else {
-        winningMessageElement.innerText = "X's Wins!";
+        winningMessageTextElement.innerText = "X's Wins!";
       }
       // winningMessageTextElement.innerText = `${
       //   player.piece == PIECES.O ? "O's" : "X's"
@@ -81,9 +81,9 @@ socket.on("turnchange", function (data) {
       winningMessageElement.classList.add("show");
     } else {
       if (player.piece == PIECES.O) {
-        winningMessageElement.innerText = "X's Wins!";
+        winningMessageTextElement.innerText = "X's Wins!";
       } else {
-        winningMessageElement.innerText = "O's Wins!";
+        winningMessageTextElement.innerText = "O's Wins!";
       }
 
       // winningMessageTextElement.innerText = `${
@@ -123,7 +123,7 @@ socket.on("gameend", function (data) {
 
 startGame();
 
-restartButton.addEventListener("click", startGame);
+// restartButton.addEventListener("click", startGame);
 
 function startGame() {
   circleTurn = false;
