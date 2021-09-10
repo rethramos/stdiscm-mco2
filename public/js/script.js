@@ -42,6 +42,8 @@ board.classList.add(player.piece == PIECES.X ? X_CLASS : CIRCLE_CLASS);
 let boardState = { board: [], id: "", turn: "" };
 let powerupCtr = 0;
 
+let hasPowerups = false;
+
 const socket = io();
 console.log({ socket });
 socket.on("connect", function () {
@@ -99,6 +101,7 @@ socket.on("grantpowerup", function (data) {
   if (data.squad == sessionStorage.getItem("squad")) {
     powerupCtr += 1;
     powerupsSpan.innerText = powerupCtr;
+    hasPowerups = powerupCtr > 0;
   }
 });
 
@@ -112,6 +115,10 @@ socket.on("gamestart", function (data) {
   // check if you are current turn
   // if current, make move
   // else disabled yung board
+});
+
+socket.on("gameend", function (data) {
+  window.location.href = "/scoreboard";
 });
 
 startGame();
@@ -133,12 +140,20 @@ function startGame() {
 function handleClick(e) {
   console.log(boardState.turn);
   const cell = e.target;
+  if (player.piece != boardState.turn) return;
+
   if (
-    player.piece != boardState.turn ||
-    cell.classList.contains(X_CLASS) ||
-    cell.classList.contains(CIRCLE_CLASS)
+    !hasPowerups &&
+    (cell.classList.contains(X_CLASS) || cell.classList.contains(CIRCLE_CLASS))
   ) {
     return;
+  }
+
+  if (hasPowerups) {
+    powerupCtr--;
+    hasPowerups = powerupCtr > 0;
+    powerupsSpan.innerText = powerupCtr;
+    socket.emit("powerupuse", { squad: sessionStorage.getItem("squad") });
   }
 
   // const currentClass = circleTurn ? CIRCLE_CLASS : X_CLASS;
@@ -150,6 +165,7 @@ function handleClick(e) {
     id: boardState.id,
     turn: oppositeOf(player.piece),
     board: boardToArray(),
+    squad: sessionStorage.getItem("squad"),
   };
 
   console.log({ newBoardState });
@@ -186,6 +202,7 @@ function isDraw() {
 
 function placeMark(cell, currentClass) {
   cell.classList.add(currentClass);
+  cell.classList.remove(oppositeClassOf(currentClass));
 }
 
 function swapTurns() {
@@ -239,8 +256,10 @@ function arrayToBoard(arr) {
 
     if (element == PIECES.X) {
       piece.classList.add(X_CLASS);
+      piece.classList.remove(CIRCLE_CLASS);
     } else if (element == PIECES.O) {
       piece.classList.add(CIRCLE_CLASS);
+      piece.classList.remove(X_CLASS);
     } else {
       piece.classList.remove(X_CLASS);
       piece.classList.remove(CIRCLE_CLASS);
@@ -257,4 +276,16 @@ function oppositeOf(piece) {
     p = PIECES.X;
   }
   return p;
+}
+
+function oppositeClassOf(pieceClass) {
+  let c;
+
+  if (pieceClass == X_CLASS) {
+    c = CIRCLE_CLASS;
+  } else if (pieceClass == CIRCLE_CLASS) {
+    c = X_CLASS;
+  }
+
+  return c;
 }

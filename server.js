@@ -27,6 +27,10 @@ const PIECES = { X: "X", O: "O", EMPTY: "-" };
 const MAX_SQUAD_SIZE = 2;
 let players = [];
 let boards = [];
+let powerups = [0, 0];
+let wins = [0, 0];
+let draws = 0;
+let finishedboards = 0;
 
 for (let i = 0; i < MAX_SQUAD_SIZE; i++) {
   boards.push({
@@ -67,6 +71,14 @@ app.post("/", (req, res) => {
 
 app.get("/queue", (req, res) => {
   res.sendFile(HTML_DIR + "/queue.html");
+});
+
+app.get("/scoreboard", (req, res) => {
+  res.sendFile(HTML_DIR + "/scoreboard.html");
+});
+
+app.get("/stats", (req, res) => {
+  res.send({ wins, draws, powerups });
 });
 
 app.get("/game", (req, res) => {
@@ -180,39 +192,37 @@ io.on("connection", (socket) => {
         boards.find((board) => board.id == boardId)
       );
     }
-
-    // for (let i = 0; i < MAX_SQUAD_SIZE; i++) {
-    //   let p1 = players[i];
-    //   let p2 = players[i + MAX_SQUAD_SIZE];
-    //   // join match
-    //   p1.socket.join(boardId);
-    //   p2.socket.join(boardId);
-    //   io.to(boardId).emit(
-    //     "gamestart",
-    //     boards.find((board) => board.id == boardId)
-    //     );
-    //   }
   });
   // listen to "turnchange" from client
   socket.on("turnchange", (data) => {
     console.log(data);
-    // check wins,etc.
-    // emit to room
-    // console.log("rooms", socket.rooms);
 
     // emit "turnchange" back to clients
     console.log("win?", checkWin(data));
     console.log("draw?", isDraw(data));
     data.hasWinner = checkWin(data);
-    data.isDraw = isDraw(data);
+    if (data.hasWinner) {
+      wins[data.squad]++;
+      finishedboards++;
+    }
 
-    console.log("BOARD ID:", data.id);
-    // console.log("CLIENTS:", io.sockets.adapter.rooms.get(data.id));
-    // console.log("SOCKET ID:", socket.id);
-    // console.log("ID:", typeof (data.id + ""));
-    console.log("ROOMS:", io.sockets.adapter.rooms);
-    io.to(data.id + "").emit("turnchange", data);
-    // io.emit("turnchange", data);
+    data.isDraw = isDraw(data);
+    if (data.isDraw) {
+      draws++;
+      finishedboards++;
+    }
+
+    if (finishedboards == boards.length) {
+      io.emit("gameend", {});
+    } else {
+      console.log("BOARD ID:", data.id);
+      console.log("ROOMS:", io.sockets.adapter.rooms);
+      io.to(data.id + "").emit("turnchange", data);
+    }
+  });
+
+  socket.on("powerupuse", (data) => {
+    powerups[data.squad]++;
   });
 
   socket.on("grantpowerup", (data) => {
