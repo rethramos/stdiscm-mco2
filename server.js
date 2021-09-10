@@ -32,22 +32,29 @@ let wins = [0, 0];
 let draws = 0;
 let finishedboards = 0;
 
-for (let i = 0; i < MAX_SQUAD_SIZE; i++) {
-  boards.push({
-    id: i,
-    turn: null,
-    board: [
-      PIECES.EMPTY,
-      PIECES.EMPTY,
-      PIECES.EMPTY,
-      PIECES.EMPTY,
-      PIECES.EMPTY,
-      PIECES.EMPTY,
-      PIECES.EMPTY,
-      PIECES.EMPTY,
-      PIECES.EMPTY,
-    ],
-  });
+function init() {
+  powerups = [0, 0];
+  wins = [0, 0];
+  draws = 0;
+  finishedboards = 0;
+  boards = [];
+  for (let i = 0; i < MAX_SQUAD_SIZE; i++) {
+    boards.push({
+      id: i,
+      turn: null,
+      board: [
+        PIECES.EMPTY,
+        PIECES.EMPTY,
+        PIECES.EMPTY,
+        PIECES.EMPTY,
+        PIECES.EMPTY,
+        PIECES.EMPTY,
+        PIECES.EMPTY,
+        PIECES.EMPTY,
+        PIECES.EMPTY,
+      ],
+    });
+  }
 }
 
 app.get("/", (req, res) => {
@@ -131,6 +138,7 @@ io.on("connection", (socket) => {
 
     // if there are enough players
     if (players.length == MAX_SQUAD_SIZE * 2) {
+      init();
       let boardId;
       for (let i = 0; i < MAX_SQUAD_SIZE; i++) {
         boardId = boards[i].id;
