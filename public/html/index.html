@@ -16,7 +16,9 @@
   <body>
     <div class="container">
       <div class="header">
-        <h1 class="game-title">Player Name:</h1>
+        <p class="game-title">Player Name: <span id="username"></span></p>
+        <p>Squad: <span id="squad"></span></p>
+        <p>Powerups: <span id="powerups"></span></p>
       </div>
       <div class="body">
         <div class="board" id="board">
@@ -33,7 +35,8 @@
       </div>
       <div class="winning-message" id="winningMessage">
         <div data-winning-message-text></div>
-        <button id="restartButton">Restart</button>
+        <p>Waiting for other matches to finish...</p>
+        <!-- <button id="restartButton">Restart</button> -->
       </div>
 
       <div class="footer">
