@@ -93,7 +93,8 @@ app.get("/game", (req, res) => {
 });
 
 io.on("connection", (socket) => {
-  console.log("a user connected");
+  console.log("a user connected. PLAYERS:");
+  printPlayers();
 
   socket.on("disconnect", () => {
     console.log("URL", socket.request.headers.referer);
@@ -110,31 +111,29 @@ io.on("connection", (socket) => {
 
   socket.on("playerqueue", (data) => {
     const p = data;
-    // p.socket = socket;
-
-    // block excess players
-    // if (players.length == MAX_SQUAD_SIZE * 2) {
-    //   return;
-    // }
 
     // find index of logged in player
     let loggedInPlayerIndex = players.findIndex(
       (player) => player.username == p.username
     );
+
+    // if player is not logged in, emit event to client and reject attempt to queue
+    if (loggedInPlayerIndex == -1) {
+      socket.emit("playernotfound", p);
+      return;
+    }
+
     players[loggedInPlayerIndex].socket = socket;
     players[loggedInPlayerIndex].sessionId = data.sessionId;
     console.log("logged in player: ", players[loggedInPlayerIndex]);
-    // if player is not logged in, reject
-    if (loggedInPlayerIndex == -1) {
-      return;
-    }
+
     //console.log("PLAYERS: ", players);
     if (loggedInPlayerIndex < MAX_SQUAD_SIZE) {
       players[loggedInPlayerIndex].squad = 0;
     } else {
       players[loggedInPlayerIndex].squad = 1;
     }
-    console.log("PLAYERS: ", players);
+    // console.log("PLAYERS: ", players);
 
     // if there are enough players
     if (players.length == MAX_SQUAD_SIZE * 2) {
@@ -263,10 +262,6 @@ function isDraw(bs) {
   });
 }
 
-// function isDraw() {
-//   return [...cellElements].every((cell) => {
-//     return (
-//       cell.classList.contains(X_CLASS) || cell.classList.contains(CIRCLE_CLASS)
-//     );
-//   });
-// }
+function printPlayers() {
+  players.forEach((player) => console.log(player.username));
+}
