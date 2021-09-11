@@ -54,6 +54,11 @@ socket.on("connect", function () {
 
 socket.on("disconnect", function () {
   console.log("Client disconnected.");
+  socket.emit("playerdisconnect", { data: "test" });
+});
+
+socket.on("playernotfound", function (data) {
+  window.location.href = "/";
 });
 
 socket.on("turnchange", function (data) {
@@ -65,9 +70,6 @@ socket.on("turnchange", function (data) {
   arrayToBoard(data.board);
   boardState = data;
   if (boardState.hasWinner) {
-    // turn = o
-    // me = x
-    // you = o
     if (player.piece != boardState.turn) {
       socket.emit("grantpowerup", { squad: sessionStorage.getItem("squad") });
       if (player.piece == PIECES.O) {
@@ -75,9 +77,7 @@ socket.on("turnchange", function (data) {
       } else {
         winningMessageTextElement.innerText = "X's Wins!";
       }
-      // winningMessageTextElement.innerText = `${
-      //   player.piece == PIECES.O ? "O's" : "X's"
-      // } Wins!`;
+
       winningMessageElement.classList.add("show");
     } else {
       if (player.piece == PIECES.O) {
@@ -86,9 +86,6 @@ socket.on("turnchange", function (data) {
         winningMessageTextElement.innerText = "O's Wins!";
       }
 
-      // winningMessageTextElement.innerText = `${
-      //   player.piece == PIECES.X ? "O's" : "X's"
-      // } Wins!`;
       winningMessageElement.classList.add("show");
     }
   } else if (boardState.isDraw) {
@@ -106,19 +103,26 @@ socket.on("grantpowerup", function (data) {
 });
 
 socket.on("gamestart", function (data) {
-  // data: {board: [], id: '', turn: ''}
   boardState = data;
   console.log({ data: data });
   arrayToBoard(boardState.board);
-
-  // player.piece =
-  // check if you are current turn
-  // if current, make move
-  // else disabled yung board
 });
 
 socket.on("gameend", function (data) {
   window.location.href = "/scoreboard";
+});
+
+socket.on("opponentdisconnect", function (data) {
+  p = player.piece;
+
+  const newBoardState = {
+    id: boardState.id,
+    turn: oppositeOf(p),
+    board: [p, p, p, p, p, p, p, p, p],
+    squad: sessionStorage.getItem("squad"),
+  };
+
+  socket.emit("turnchange", newBoardState);
 });
 
 startGame();
@@ -171,16 +175,6 @@ function handleClick(e) {
   console.log({ newBoardState });
   // emit to server
   socket.emit("turnchange", newBoardState);
-
-  // TODO: transfer to server
-  // if (checkWin(currentClass)) {
-  //   endGame(false);
-  // } else if (isDraw()) {
-  //   endGame(true);
-  // } else {
-  //   // swapTurns();
-  //   // setBoardHoverClass();
-  // }
 }
 
 function endGame(draw) {
