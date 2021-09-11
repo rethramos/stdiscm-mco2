@@ -105,7 +105,16 @@ io.on("connection", (socket) => {
       console.log("a user disconnected session id: " + socket.id);
       players = players.filter((player) => player.sessionId != socket.id);
       console.log("current players:");
-      players.forEach((player) => console.log(player));
+      // players.forEach((player) => console.log(player));
+      printPlayers();
+    } else if (endpoint == "/queue") {
+      if (players.length < MAX_SQUAD_SIZE * 2) {
+        console.log("a user disconnected session id: " + socket.id);
+        players = players.filter((player) => player.sessionId != socket.id);
+        console.log("current players:");
+        // players.forEach((player) => console.log(player));
+        printPlayers();
+      }
     }
   });
 
