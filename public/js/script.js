@@ -54,6 +54,7 @@ socket.on("connect", function () {
 
 socket.on("disconnect", function () {
   console.log("Client disconnected.");
+  socket.emit("playerdisconnect", { data: "test" });
 });
 
 socket.on("playernotfound", function (data) {
@@ -109,6 +110,19 @@ socket.on("gamestart", function (data) {
 
 socket.on("gameend", function (data) {
   window.location.href = "/scoreboard";
+});
+
+socket.on("opponentdisconnect", function (data) {
+  p = player.piece;
+
+  const newBoardState = {
+    id: boardState.id,
+    turn: oppositeOf(p),
+    board: [p, p, p, p, p, p, p, p, p],
+    squad: sessionStorage.getItem("squad"),
+  };
+
+  socket.emit("turnchange", newBoardState);
 });
 
 startGame();

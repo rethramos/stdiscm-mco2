@@ -102,22 +102,32 @@ io.on("connection", (socket) => {
     let endpoint = referer[referer.length - 1];
     endpoint = "/" + endpoint;
     if (endpoint == "/game") {
-      console.log("a user disconnected session id: " + socket.id);
-      players = players.filter((player) => player.sessionId != socket.id);
+      // console.log("a user disconnected session id: " + socket.id);
+      console.log("ROOMS:", io.sockets.adapter.rooms);
+
+      if (finishedboards != boards.length) {
+        console.log("IN ");
+        let disconnectedPlayer = players.find((p) => p.sessionId == socket.id);
+        console.log("DISCONNECTED PLAYER:", disconnectedPlayer);
+        io.to(disconnectedPlayer.boardId + "").emit("opponentdisconnect", {});
+      }
+
+      // players = players.filter((player) => player.sessionId != socket.id);
       console.log("current players:");
-      // players.forEach((player) => console.log(player));
       printPlayers();
     } else if (endpoint == "/queue") {
       if (players.length < MAX_SQUAD_SIZE * 2) {
         console.log("a user disconnected session id: " + socket.id);
         players = players.filter((player) => player.sessionId != socket.id);
         console.log("current players:");
-        // players.forEach((player) => console.log(player));
         printPlayers();
       }
     }
   });
 
+  socket.on("playerdisconnect", (data) => {
+    console.log("FROM PLAYER DISCONNECT:", data.data);
+  });
   socket.on("playerqueue", (data) => {
     const p = data;
 
@@ -227,13 +237,14 @@ io.on("connection", (socket) => {
     }
 
     data.isDraw = isDraw(data);
-    if (data.isDraw) {
+    if (data.isDraw && !data.hasWinner) {
       draws++;
       finishedboards++;
     }
     console.log("FINISHED:", finishedboards);
     if (finishedboards == boards.length) {
       io.emit("gameend", {});
+      players = [];
     } else {
       console.log("BOARD ID:", data.id);
       console.log("ROOMS:", io.sockets.adapter.rooms);
