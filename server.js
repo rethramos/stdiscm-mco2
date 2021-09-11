@@ -182,7 +182,11 @@ io.on("connection", (socket) => {
     // update socket
     let index = players.findIndex((p) => p.username == player.username);
     console.log("INDEX: ", index);
-    if (index == -1) return;
+    if (index == -1) {
+      socket.emit("playernotfound", player);
+      console.log("PLAYER NOT FOUND FROM MATCH ENTER:");
+      return;
+    }
 
     players[index].socket = socket;
     players[index].sessionId = socket.id;
