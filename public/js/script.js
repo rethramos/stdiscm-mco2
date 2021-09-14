@@ -1,5 +1,3 @@
-const e = require("express");
-
 const PIECES = { X: "X", O: "O", EMPTY: "-" };
 
 const X_CLASS = "x";
@@ -22,7 +20,6 @@ const winningMessageTextElement = document.querySelector(
   "[data-winning-message-text]"
 );
 const playerName = document.getElementById("playerName");
-const isTurn = document.getElementById("isTurn");
 let circleTurn;
 
 const player = {
@@ -133,7 +130,6 @@ startGame();
 // restartButton.addEventListener("click", startGame);
 
 function startGame() {
-  showTurn();  
   circleTurn = false;
   cellElements.forEach((cell) => {
     cell.classList.remove(X_CLASS);
@@ -205,23 +201,6 @@ function placeMark(cell, currentClass) {
 
 function swapTurns() {
   circleTurn = !circleTurn;
-  showTurn();  
-}
-
-function showTurn(){
-  if(circleTurn){
-    if(player.piece == PIECES.O){
-      isTurn.style.visibility === "visible";
-    }else{
-      isTurn.style.visibility === "hidden";
-    }
-  }else{
-    if(player.piece == PIECES.O){
-      isTurn.style.visibility === "hidden";
-    }else{
-      isTurn.style.visibility === "visible";
-    }
-  }
 }
 
 // function setBoardHoverClass() {
