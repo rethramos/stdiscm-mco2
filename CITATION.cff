@@ -18,6 +18,8 @@ authors:
     given-names: Julian
 cff-version: "1.1.0"
 date-released: 2021-09-15
+doi: "10.5281/zenodo.5509909"
 message: "If you use this software, please cite it using these metadata."
 repository-code: "https://github.com/rethramos/stdiscm-mco2"
+title: "Take-Tac-Toe"
 ...
